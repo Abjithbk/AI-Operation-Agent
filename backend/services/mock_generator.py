@@ -1,6 +1,6 @@
 import random 
 from datetime import datetime,timedelta
-
+from schemas.metric import MetricCreate
 SERVICES = [
     "payment-service",
     "auth-service", 
@@ -56,3 +56,46 @@ def generate_mock_logs(count:int = 1000):
         }
         logs.append(log)
     return logs
+
+def generate_mock_metrics(count: int = 200):
+    metrics = []
+    base_time = datetime.now() - timedelta(minutes=count)
+
+    for i in range(count):
+        timestamp = base_time + timedelta(minutes=i)
+
+        # Normal CPU between 40-60% but spike at reading 150-160
+        if 150 <= i <= 160:
+            cpu = random.uniform(85, 95)   # SPIKE!
+        else:
+            cpu = random.uniform(40, 60)   # Normal
+
+        # Normal memory between 55-70% but spike at reading 150-160
+        if 150 <= i <= 160:
+            memory = random.uniform(85, 95)  # SPIKE!
+        else:
+            memory = random.uniform(55, 70)  # Normal
+
+        # Normal response time 100-200ms but spike at reading 150-160
+        if 150 <= i <= 160:
+            response_time = random.uniform(800, 1200)  # SPIKE!
+        else:
+            response_time = random.uniform(100, 200)   # Normal
+
+        metrics.append(MetricCreate(
+            service=random.choice(SERVICES),
+            metric_name="cpu_usage",
+            value=round(cpu, 2)
+        ))
+        metrics.append(MetricCreate(
+            service=random.choice(SERVICES),
+            metric_name="memory_usage",
+            value=round(memory, 2)
+        ))
+        metrics.append(MetricCreate(
+            service=random.choice(SERVICES),
+            metric_name="response_time",
+            value=round(response_time, 2)
+        ))
+
+    return metrics
