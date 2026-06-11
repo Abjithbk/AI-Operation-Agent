@@ -5,6 +5,7 @@ from models import Log
 from schemas.log import LogResponse
 from typing import List
 from services.mock_generator import generate_mock_logs
+from services.ai_grouping import group_and_summarise
 router = APIRouter()
 
 @router.post("/logs/generate")
@@ -25,8 +26,8 @@ def create_log(db:Session = Depends(get_db)):
         "message":"1000 mocks created"
     }
 
-@router.get("/logs",response_model=List[LogResponse])
+@router.get("/logs/analyse")
 def get_losg(db:Session = Depends(get_db)):
 
-    logs = db.query(Log).all()
-    return logs
+    results = group_and_summarise(db)
+    return results
