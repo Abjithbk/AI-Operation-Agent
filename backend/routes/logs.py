@@ -10,6 +10,8 @@ from services.ai_grouping import group_and_summarise
 from services.mock_generator import generate_mock_metrics
 from services.anomaly_detection import detect_anomalies
 from services.correlation import correlate_metrics_with_logs
+from services.chat_service import chat_with_logs
+from schemas.chat import ChatRequest,ChatResponse
 router = APIRouter()
 
 @router.post("/logs/generate")
@@ -75,3 +77,10 @@ def get_metric_readings(metric_name: str, db: Session = Depends(get_db)):
         }
         for m in metrics
     ]
+
+@router.post("/chat",response_model=ChatResponse)
+def chat(request:ChatRequest,db:Session = Depends(get_db)):
+    answer = chat_with_logs(db,request.question)
+    return {
+        "answer":answer
+    }
