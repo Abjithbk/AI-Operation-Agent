@@ -1,20 +1,35 @@
 'use client'
 import React from 'react'
 import {Search, Bell,User} from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 const Navbar = () => {
+
+    const pathname = usePathname();
+    const tabs = [
+    { name: "Incidents", href: "/" },
+    { name: "Metrics", href: "/metrics" },
+    { name: "Chat", href: "/chat" },
+  ];
   return (
     <nav className='border-b border-slate-800 bg-slate-950 px-8 py-4 flex items-center justify-between'>
         <h1 className='text-xl font-bold text-indigo-400'>AI ops Agent</h1>
         <div className='flex gap-6 text-sm font-medium'>
-            <span className='text-white border-b-2 border-indigo-400 pb-1'>
-                Incidents
-            </span>
-            <span className='text-slate-400 hover:text-white cursor-pointer'>
-                Metrics
-            </span>
-            <span className='text-slate-400 hover:text-white cursor-pointer'>
-                Chat
-            </span>
+            {
+                tabs.map((tab) => (
+                    <Link
+                      key = {tab.href}
+                      href = {tab.href}
+                      className={
+                        pathname === tab.href
+                            ? "text-white border-b-2 border-indigo-400 pb-1"
+                            : "text-slate-400 hover:text-white"
+                        }
+                    >
+                        {tab.name}
+                    </Link>
+                ))
+            }
         </div>
         <div className=' flex items-center gap-4'>
             <div className='relative'>

@@ -54,7 +54,24 @@ def get_anomalies(metric_name: str, db: Session = Depends(get_db)):
     results = detect_anomalies(db, metric_name)
     return results
 
+
+
 @router.get("/correlate/{metric_name}")
 def correlate(metric_name: str, db: Session = Depends(get_db)):
     results = correlate_metrics_with_logs(db, metric_name)
     return results
+
+@router.get("/metrics/{metric_name}")
+def get_metric_readings(metric_name: str, db: Session = Depends(get_db)):
+    metrics = db.query(Metric).filter(
+        Metric.metric_name == metric_name
+    ).order_by(Metric.timestamp).all()
+    
+    return [
+        {
+            "timestamp": m.timestamp,
+            "value": m.value,
+            "service": m.service
+        }
+        for m in metrics
+    ]
