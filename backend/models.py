@@ -22,3 +22,11 @@ class Metric(Base):
     service = Column(String)
     metric_name = Column(String)
     value = Column(Float)
+
+class ApiKey(Base):
+    __tablename__ = 'api_keys'
+    id = Column(String,primary_key=True,default=generate_uuid)
+    key = Column(String,unique=True,index=True)
+    name=Column(String)
+    created_at = Column(DateTime,default=func.now())
+    is_active = Column(String,default=True)

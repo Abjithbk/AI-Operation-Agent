@@ -1,8 +1,8 @@
 from fastapi import APIRouter,Depends
 from sqlalchemy.orm import Session
 from database import get_db
-from models import Log,Metric
-from schemas.log import LogResponse
+from models import Log,Metric,ApiKey
+from schemas.log import LogResponse,LogCreate
 from schemas.metric import MetricResponse
 from typing import List
 from services.mock_generator import generate_mock_logs
@@ -11,9 +11,27 @@ from services.mock_generator import generate_mock_metrics
 from services.anomaly_detection import detect_anomalies
 from services.correlation import correlate_metrics_with_logs
 from services.chat_service import chat_with_logs
+from services.api_key_service import generate_api_key
+from dependencies.auth import require_api_key
 from schemas.chat import ChatRequest,ChatResponse
+
 router = APIRouter()
 
+@router.post("/logs", response_model=LogResponse)
+def create_log_single(
+    log: LogCreate,
+    db: Session = Depends(get_db),
+    api_key: str = Depends(require_api_key)
+):
+    new_log = Log(
+        level=log.level,
+        service=log.service,
+        message=log.message
+    )
+    db.add(new_log)
+    db.commit()
+    db.refresh(new_log)
+    return new_log
 @router.post("/logs/generate")
 
 def create_log(db:Session = Depends(get_db)):
@@ -84,3 +102,14 @@ def chat(request:ChatRequest,db:Session = Depends(get_db)):
     return {
         "answer":answer
     }
+
+@router.post('/api-keys')
+def create_api_key(name:str,db:Session = Depends(get_db)):
+    api_key = generate_api_key(db,name)
+    return {
+        "id":api_key.id,
+        "name":api_key.name,
+        "key":api_key.key,
+        "message":"Copy this key securely - it won't be shown again."
+    }
+
