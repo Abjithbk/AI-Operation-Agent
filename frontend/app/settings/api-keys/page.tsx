@@ -162,7 +162,8 @@ const ApiKeysPage = () => {
             Add this header to every request from your production app:
           </p>
           <div className="bg-slate-950 rounded-lg p-4">
-            <code className="text-xs text-green-400">
+            <pre className='bg-slate-950 rounded-lg p-4 overflow-x-auto'>
+                <code className="text-xs text-green-400">
               {`import requests
 
 requests.post(
@@ -175,6 +176,8 @@ requests.post(
     }
 )`}
             </code>
+
+            </pre>
           </div>
         </div>
       </div>
