@@ -113,3 +113,16 @@ def create_api_key(name:str,db:Session = Depends(get_db)):
         "message":"Copy this key securely - it won't be shown again."
     }
 
+@router.get('/api-keys')
+def get_api_keys(db:Session = Depends(get_db)):
+    keys = db.query(ApiKey).all()
+
+    return [
+        {
+            "id": k.id,
+            "name":k.name,
+            "created_at":k.created_at,
+        }
+        for k in keys
+    ]
+
