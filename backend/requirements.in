@@ -7,3 +7,5 @@ langchain
 langchain-groq
 sentence-transformers
 scikit-learn
+celery
+redis

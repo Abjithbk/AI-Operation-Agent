@@ -14,7 +14,7 @@ from services.chat_service import chat_with_logs
 from services.api_key_service import generate_api_key
 from dependencies.auth import require_api_key
 from schemas.chat import ChatRequest,ChatResponse
-
+from tasks import analyse_log_task,detect_anomalies_task
 router = APIRouter()
 
 @router.post("/logs", response_model=LogResponse)
@@ -125,4 +125,22 @@ def get_api_keys(db:Session = Depends(get_db)):
         }
         for k in keys
     ]
+
+@router.post('/logs/analyse/async')
+def analyse_logs_async():
+    task = analyse_log_task.delay()
+    return {
+        'message':'Analysis started in background',
+        'task_id':task.id
+    }
+
+@router.get('/tasks/{task_id}')
+def get_task_status(task_id:str):
+    from celery_app import celery
+    task = celery.AsyncResult(task_id)
+    return {
+        'task_id':task_id,
+        'status':task.status,
+        'result':task.result if task.ready() else None
+    }
 
