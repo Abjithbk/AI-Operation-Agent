@@ -30,3 +30,5 @@ class ApiKey(Base):
     name=Column(String)
     created_at = Column(DateTime,default=func.now())
     is_active = Column(String,default=True)
+
+
