@@ -1,7 +1,8 @@
 'use client'
-import React from 'react'
-import { Sparkles,Wand2,Clock } from 'lucide-react'
+import React, { useState } from 'react'
+import { Sparkles,Wand2,Clock,Bell,BellRing } from 'lucide-react'
 import { Incident } from '../types/incident';
+import { resendSlackAlert } from '../services/incidentService';
 
 const severityStyles = {
   CRITICAL: {
@@ -24,6 +25,25 @@ const severityStyles = {
 
 const IncidentCard = ({incident} : {incident:Incident}) => {
     const styles = severityStyles[incident.ai_summary.severity]
+    const [sending,setSending] = useState(false);
+    const [sent,setSent] = useState(false)
+
+    const handleSlackAlert = async () => {
+      setSending(false)
+      try {
+        await resendSlackAlert(incident)
+        setSent(true)
+        setTimeout(() => {
+          setSent(false)
+        }, 3000);
+      }
+      catch(err) {
+        console.error(err)
+      }
+      finally {
+        setSending(false)
+      }
+    }
   return (
     <div
       className={`bg-slate-900 border border-slate-800 ${styles.border} border-l-4 rounded-xl p-6`}
@@ -44,6 +64,22 @@ const IncidentCard = ({incident} : {incident:Incident}) => {
         <span className="text-xs bg-slate-800 text-slate-300 px-3 py-1 rounded-full">
           {incident.log_count} occurrences
         </span>
+        <button onClick={handleSlackAlert} disabled={sending} className={`flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg border transition-all ${sent? 'bg-green-500/20 border-green-500/30 text-green-400':'bg-slate-800 border-slate-700 text-slate-300 hover:border-indigo-400 hover:text-indigo-400'}`}>
+        {
+          sent? (
+            <>
+            <BellRing size={12} />
+            Sent!
+            </>
+          ):(
+            <>
+             <Bell size={12} />
+             {sending ?'Sending' : 'Slack Alert'}
+            </>
+          )
+        }
+
+        </button>
       </div>
 
       {/* Title */}

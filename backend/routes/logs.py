@@ -15,6 +15,8 @@ from services.api_key_service import generate_api_key
 from dependencies.auth import require_api_key
 from schemas.chat import ChatRequest,ChatResponse
 from tasks import analyse_log_task,detect_anomalies_task
+from services.slack_notifier import send_slack_alert
+from schemas.slack import SlackAlertRequest
 router = APIRouter()
 
 @router.post("/logs", response_model=LogResponse)
@@ -144,3 +146,22 @@ def get_task_status(task_id:str):
         'result':task.result if task.ready() else None
     }
 
+@router.post('/alerts/slack')
+def resend_slack_alert(request:SlackAlertRequest):
+
+    success = send_slack_alert(
+        group=request.group,
+        summary=request.summary,
+        severity=request.severity,
+        suggestion=request.suggestion,
+        log_count=request.log_count
+    )
+
+    if success:
+        return {
+            "message":"Alert sent to Slack Successfully"
+        }
+    else:
+        return {
+            'message':'Failed to send alert'
+        }

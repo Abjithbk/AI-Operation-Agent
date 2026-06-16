@@ -3,6 +3,7 @@ from database import SessionLocal
 from services.ai_grouping import group_and_summarise
 from services.anomaly_detection import detect_anomalies
 from services.slack_notifier import send_slack_alert 
+import json
 import traceback
 
 @celery.task(name='analyse_logs', bind=True)
@@ -11,53 +12,42 @@ def analyse_log_task(self):
 
     try:
         results = group_and_summarise(db)
-        incident_count = len(results)
-        
-        # 👈 NEW: Trigger Slack alert if any incidents were found
-        if incident_count > 0:
-            send_slack_alert(
-                incident_title="Log Anomaly Clustered",
-                severity="high",
-                summary="AI has detected, grouped, and summarized new application errors.",
-                incident_count=incident_count
-            )
+        for incident in results:
+            summary = incident.get('ai_summary',{})
+            if isinstance(summary,str):
+                summary = json.loads(summary)
+            severity = summary.get('severity','LOW')
+
+            if severity in ["CRITICAL", "HIGH"]:
+                send_slack_alert(
+                    group=summary.get("group", "Unknown"),
+                    summary=summary.get("summary", ""),
+                    severity=severity,
+                    suggestion=summary.get("suggestion", ""),
+                    log_count=incident.get("log_count", 0)
+                )
 
         return {
             'status': 'success',
-            'incidents': incident_count
+            'incidents': len(results)
         }
     except Exception as e:
         print(f"Task failed: {str(e)}")
         print(traceback.format_exc())
-        raise self.retry(exc=e, max_retries=3) # 👈 Changed max_retries to 3 so it actually retries on failure
+        raise self.retry(exc=e, max_retries=0)
     finally:
         db.close()
 
 
-@celery.task(name='detect_metric_anomalies', bind=True)
+@celery.task(name="detect_metric_anomalies", bind=True)
 def detect_anomalies_task(self, metric_name: str):
     db = SessionLocal()
-
     try:
         results = detect_anomalies(db, metric_name)
-        anomaly_count = results.get('anomalies_found', 0)
-        
-        # 👈 NEW: Trigger Slack alert if any metric anomalies were found
-        if anomaly_count > 0:
-            send_slack_alert(
-                incident_title=f"Metric Anomaly: {metric_name.replace('_', ' ').title()}",
-                severity="critical",
-                summary=f"Statistical anomaly detected in {metric_name} metrics by Isolation Forest.",
-                incident_count=anomaly_count
-            )
-
-        return {
-            'status': 'success',
-            'anomalies': anomaly_count
-        }
+        return {"status": "success", "anomalies": results["anomalies_found"]}
     except Exception as e:
         print(f"Task failed: {str(e)}")
         print(traceback.format_exc())
-        raise self.retry(exc=e, max_retries=3) # 👈 Changed max_retries to 3
+        raise self.retry(exc=e, max_retries=0)
     finally:
         db.close()

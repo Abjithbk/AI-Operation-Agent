@@ -1,34 +1,32 @@
-import os
 import requests
-import logging
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-
-logger = logging.getLogger(__name__)
-
-# Get the URL from the .env file
 SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
 
-def send_slack_alert(incident_title: str, severity: str, summary: str, incident_count: int = 1):
-    """
-    Sends a formatted alert to Slack using Block Kit.
-    """
-    if not SLACK_WEBHOOK_URL:
-        logger.warning("SLACK_WEBHOOK_URL not set. Skipping Slack alert.")
-        return False
-
-    # Color coding based on severity for the Slack message border
+def send_slack_alert(group: str, summary: str, severity: str, 
+                     suggestion: str, log_count: int):
+    
+    # Color based on severity
     color_map = {
-        "critical": "#ff0000",
-        "high": "#ff9900",
-        "medium": "#ffcc00",
-        "low": "#36a64f"
+        "CRITICAL": "#FF0000",
+        "HIGH": "#FF6600", 
+        "MEDIUM": "#FFAA00",
+        "LOW": "#00AA00"
     }
-    color = color_map.get(severity.lower(), "#36a64f")
+    color = color_map.get(severity, "#FF0000")
+    
+    # Severity emoji
+    emoji_map = {
+        "CRITICAL": "🚨",
+        "HIGH": "⚠️",
+        "MEDIUM": "🟡",
+        "LOW": "🟢"
+    }
+    emoji = emoji_map.get(severity, "🚨")
 
-    # Slack Block Kit payload for a rich, readable message
     payload = {
         "attachments": [
             {
@@ -38,8 +36,7 @@ def send_slack_alert(incident_title: str, severity: str, summary: str, incident_
                         "type": "header",
                         "text": {
                             "type": "plain_text",
-                            "text": f"🚨 AI Ops Alert: {incident_title}",
-                            "emoji": True
+                            "text": f"{emoji} {severity} INCIDENT DETECTED"
                         }
                     },
                     {
@@ -47,11 +44,11 @@ def send_slack_alert(incident_title: str, severity: str, summary: str, incident_
                         "fields": [
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Severity:*\n{severity.upper()}"
+                                "text": f"*Incident:*\n{group}"
                             },
                             {
                                 "type": "mrkdwn",
-                                "text": f"*Incidents Grouped:*\n{incident_count}"
+                                "text": f"*Occurrences:*\n{log_count}"
                             }
                         ]
                     },
@@ -63,11 +60,21 @@ def send_slack_alert(incident_title: str, severity: str, summary: str, incident_
                         }
                     },
                     {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"*Suggested Fix:*\n{suggestion}"
+                        }
+                    },
+                    {
+                        "type": "divider"
+                    },
+                    {
                         "type": "context",
                         "elements": [
                             {
                                 "type": "mrkdwn",
-                                "text": "Posted by AI Operations Agent 🤖"
+                                "text": "AI Ops Agent • Automated Alert"
                             }
                         ]
                     }
@@ -77,10 +84,8 @@ def send_slack_alert(incident_title: str, severity: str, summary: str, incident_
     }
 
     try:
-        response = requests.post(SLACK_WEBHOOK_URL, json=payload, timeout=5)
-        response.raise_for_status()
-        logger.info("✅ Slack alert sent successfully.")
-        return True
-    except requests.exceptions.RequestException as e:
-        logger.error(f"❌ Failed to send Slack alert: {e}")
+        response = requests.post(SLACK_WEBHOOK_URL, json=payload)
+        return response.status_code == 200
+    except Exception as e:
+        print(f"Slack alert failed: {str(e)}")
         return False
