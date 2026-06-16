@@ -24,3 +24,25 @@ celery.conf.update(
         "ssl_cert_reqs": ssl.CERT_NONE
     },
 )
+
+celery.conf.beat_schedule = {
+    "auto-analyse-logs": {
+        "task": "analyse_logs",
+        "schedule": 300.0,  # every 5 minutes
+    },
+    "auto-detect-cpu-anomalies": {
+        "task": "detect_metric_anomalies",
+        "args": ["cpu_usage"],
+        "schedule": 300.0,
+    },
+    "auto-detect-memory-anomalies": {
+        "task": "detect_metric_anomalies",
+        "args": ["memory_usage"],
+        "schedule": 300.0,
+    },
+    "auto-detect-response-anomalies": {
+        "task": "detect_metric_anomalies",
+        "args": ["response_time"],
+        "schedule": 300.0,
+    },
+}

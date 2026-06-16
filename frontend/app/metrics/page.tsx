@@ -11,6 +11,7 @@ import {
 } from "../services/metricService";
 import { Anomaly } from "../types/metric";
 import AnomaliesTable from "../components/AnomaliesTable";
+import api from "../lib/axios";
 
 interface MetricData {
   readings: MetricReading[];
@@ -119,6 +120,24 @@ export default function Metrics() {
             <AnomaliesTable anomalies={allAnomalies} />
           </>
         )}
+        {!loading && !error && cpu.readings.length === 0 && (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="text-5xl mb-4">📊</div>
+              <h3 className="text-xl font-bold mb-2">No metrics yet</h3>
+              <p className="text-slate-400 text-sm mb-6">
+                Generate mock metrics to see charts and anomaly detection
+              </p>
+              <button
+                onClick={async () => {
+                  await api.post("/metrics/generate");
+                  window.location.reload();
+                }}
+                className="bg-indigo-500 hover:bg-indigo-600 rounded-lg px-6 py-2 text-sm font-medium"
+              >
+                Generate Mock Metrics
+              </button>
+            </div>
+          )}
       </div>
     </div>
   );

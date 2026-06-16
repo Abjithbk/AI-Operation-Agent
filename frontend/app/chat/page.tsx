@@ -81,9 +81,29 @@ const Chat = () => {
           {/* Messages */}
           <div className="flex-1 flex flex-col gap-6 overflow-y-auto mb-4">
             {messages.length === 0 && (
-              <div className="flex-1 flex items-center justify-center text-slate-500 text-sm">
-                Ask anything about your logs to get started.
-              </div>
+              <div className="flex flex-col items-center justify-center flex-1 text-center gap-6">
+    <div className="text-5xl">💬</div>
+    <div>
+      <h3 className="text-xl font-bold mb-2">Ask me anything about your logs</h3>
+      <p className="text-slate-400 text-sm">I can analyze patterns, explain errors, and suggest fixes</p>
+    </div>
+    <div className="grid grid-cols-2 gap-3 w-full max-w-lg">
+      {[
+        "Why did checkout fail?",
+        "Which service has most errors?",
+        "What database issues happened?",
+        "Summarize payment errors"
+      ].map((q) => (
+        <button
+          key={q}
+          onClick={() => setInput(q)}
+          className="bg-slate-900 border border-slate-700 hover:border-indigo-400 rounded-lg p-3 text-sm text-slate-300 text-left transition-colors"
+        >
+          {q}
+        </button>
+      ))}
+    </div>
+  </div>
             )}
 
             {messages.map((msg, idx) => (

@@ -8,6 +8,7 @@ import { AlertTriangle, AlertCircle, Network, Heart } from "lucide-react";
 import { dummyStats,dummyIncidents } from "./data/dummyData";
 import { fetchIncidents } from "./services/incidentService";
 import { BackendIncident } from "./types/incident";
+import api from "./lib/axios";
 
 export default function Home() {
   const [incidents,setIncidents] = useState<BackendIncident[]>([]);
@@ -19,6 +20,8 @@ export default function Home() {
 
       try {
         const data = await fetchIncidents();
+        console.log("Incidents Data:",data)
+        console.log("Incidents length:",data.length)
         setIncidents(data);
       }
       catch(err) {
@@ -76,9 +79,25 @@ export default function Home() {
             {error && <p className="text-red-400">{error}</p>}
 
             {!loading && !error && incidents.length === 0 && (
-              <p className="text-slate-400">No incidents found.</p>
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <h3 className="text-xl font-bold mb-2">No incidents yet</h3>
+                <p className="text-slate-400 text-sm mb-6">
+                  Generate some mock logs to see AI analysis in action
+                </p>
+                <button 
+                onClick={async () => {
+                  await api.post('/logs/generate');
+                  await api.post('/logs/analyse/async')
+                  window.location.reload();
+
+                }}
+                className="bg-indigo-500 hover:bg-indigo-600 rounded-lg px-6 py-2 text-sm font-medium">
+                  Generate Mock Logs
+                </button>
+
+              </div>
             )}
-          {incidents.map((incident) => (
+          {Array.isArray(incidents) && incidents.map((incident) => (
             <IncidentCard key={incident.cluster_id} incident={{...incident,timestamp:"Just Now"}} />
           ))}
         </div>
