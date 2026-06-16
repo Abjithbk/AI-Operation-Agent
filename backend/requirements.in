@@ -1,11 +1,12 @@
 fastapi
 uvicorn
-python-dotenv
 sqlalchemy
 psycopg2-binary
+python-dotenv
 langchain
 langchain-groq
-sentence-transformers
-scikit-learn
 celery
 redis
+requests
+numpy
+scikit-learn

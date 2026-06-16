@@ -1,84 +1,58 @@
 from langchain_groq import ChatGroq
 from sqlalchemy.orm import Session
 from models import Log
-from sentence_transformers import SentenceTransformer
-from sklearn.cluster import DBSCAN
-import numpy as np
 import os
-from dotenv import load_dotenv
-import re
 import json
+import re
+from dotenv import load_dotenv
+
 load_dotenv()
 
-
-#Load NLP model
-
-embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
-
 llm = ChatGroq(
-    api_key=os.getenv('GROQ_API_KEY'),
-    model_name='llama-3.3-70b-versatile'
+    api_key=os.getenv("GROQ_API_KEY"),
+    model_name="llama-3.3-70b-versatile"
 )
 
-def cluster_logs(messages:list[str]):
+def group_and_summarise(db: Session):
+    # Get only ERROR logs
+    error_logs = db.query(Log).filter(Log.level == "ERROR").all()
 
-    embeddings = embedding_model.encode(messages)
+    if not error_logs:
+        return {"message": "no error logs found"}
 
-    clustering = DBSCAN(eps=0.5,min_samples=2,metric='cosine')
-    labels = clustering.fit_predict(embeddings)
-    
-    return labels
+    # Prepare log text
+    logs_text = "\n".join([
+        f"{log.service}: {log.message}"
+        for log in error_logs[:200]  # limit to 200 logs
+    ])
 
-def summarize_cluster(messages:list[str]):
-    sample = messages[:10]
-    logs_text = "\n".join(sample)
-    prompt = f"""You are an expert DevOps engineer analyzing application logs.
-Here are some related error logs:
+    prompt = f"""You are an expert DevOps engineer analyzing application error logs.
+
+Here are {len(error_logs)} error logs:
 
 {logs_text}
 
-Provide a JSON response with exactly these fields:
-- group: short name for this issue
-- summary: one sentence explanation of what went wrong
-- severity: one of CRITICAL, HIGH, MEDIUM, LOW
-- suggestion: one sentence on how to fix it
+Group similar logs by root cause. Return ONLY a JSON array like this:
+[
+  {{
+    "cluster_id": 0,
+    "log_count": 50,
+    "ai_summary": {{
+      "group": "Short group name",
+      "summary": "One sentence explanation",
+      "severity": "CRITICAL",
+      "suggestion": "One sentence fix suggestion"
+    }}
+  }}
+]
 
-Return only raw JSON, no markdown, no backticks, no extra text."""
-    
+Severity must be one of: CRITICAL, HIGH, MEDIUM, LOW
+Return only raw JSON array, no markdown, no backticks."""
+
     response = llm.invoke(prompt)
-    cleaned = re.sub(r'```json|```','',response.content).strip()
+    
     try:
+        cleaned = re.sub(r'```json|```', '', response.content).strip()
         return json.loads(cleaned)
     except:
-        return {
-            "raw":cleaned
-        }
-
-def group_and_summarise(db:Session):
-
-    error_logs = db.query(Log).filter(Log.level == "ERROR").all()
-    if not error_logs:
-        return {
-            "message":"no error logs found"
-        }
-    messages = [log.message for log in error_logs]
-
-    labels = cluster_logs(messages)
-
-    clusters = {}
-    for i,label in enumerate(labels):
-        if label == -1:
-            continue
-        if label not in clusters:
-            clusters[label] = []
-        clusters[label].append(messages[i])
-    
-    results = []
-    for label,msgs in clusters.items():
-        summary = summarize_cluster(msgs)
-        results.append({
-            "cluster_id":int(label),
-            "log_count":len(msgs),
-            "ai_summary":summary
-        })
-    return results
+        return {"message": "Failed to parse AI response"}
