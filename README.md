@@ -86,8 +86,11 @@ pip-sync requirements.txt
 Create `.env` file:
 
 DATABASE_URL=your_supabase_connection_string
+
 GROQ_API_KEY=your_groq_api_key
+
 REDIS_URL=your_upstash_redis_url
+
 SLACK_WEBHOOK_URL=your_slack_webhook_url
 
 Run backend:
@@ -110,7 +113,9 @@ npm install
 Create `.env.local`:
 
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
+
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 Run frontend:
