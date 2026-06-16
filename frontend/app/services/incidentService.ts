@@ -3,6 +3,7 @@ import { BackendIncident } from "../types/incident";
 
 export async function fetchIncidents(): Promise<BackendIncident[]> {
 
+
     const response = await api.get<BackendIncident[]>("/logs/analyse");
     if(!Array.isArray(response.data)) {
         return []

@@ -12,8 +12,14 @@ import api from "./lib/axios";
 
 export default function Home() {
   const [incidents,setIncidents] = useState<BackendIncident[]>([]);
+  const [filter,setFilter] = useState('all')
   const [loading,setLoading] = useState(true);
   const [error,setError] = useState<string | null>(null);
+
+  const filterIncidents = incidents.filter((incident) => {
+    if(filter === 'all') return true
+    return incident.ai_summary.severity.toLowerCase() === filter
+  })
 
   useEffect(() => {
     const loadData = async () => {
@@ -68,7 +74,7 @@ export default function Home() {
       </div>
        <div className="flex gap-6">
         <div className="w-64">
-          <Filters/>
+          <Filters selected={filter} onChange={setFilter} />
 
         </div>
          <div className="flex flex-1 flex-col gap-4">
@@ -97,7 +103,7 @@ export default function Home() {
 
               </div>
             )}
-          {Array.isArray(incidents) && incidents.map((incident) => (
+          {Array.isArray(incidents) && filterIncidents.map((incident) => (
             <IncidentCard key={incident.cluster_id} incident={{...incident,timestamp:"Just Now"}} />
           ))}
         </div>

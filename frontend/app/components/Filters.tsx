@@ -2,8 +2,13 @@
 
 import { useState } from "react";
 
-export default function Filters() {
-  const [filter, setFilter] = useState("all");
+interface FiltersProps {
+  selected: string;
+  onChange: (value: string) => void;
+}
+
+export default function Filters({selected,onChange}:FiltersProps) {
+
 
   const options = [
     { id: "all", label: "All Incidents" },
@@ -23,8 +28,8 @@ export default function Filters() {
             <input
               type="radio"
               name="filter"
-              checked={filter === option.id}
-              onChange={() => setFilter(option.id)}
+              checked={selected === option.id}
+              onChange={() => onChange(option.id)}
               className="w-4 h-4 accent-indigo-500"
             />
             {option.label}

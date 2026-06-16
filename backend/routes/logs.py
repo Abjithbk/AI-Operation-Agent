@@ -4,7 +4,7 @@ from database import get_db
 from models import Log,Metric,ApiKey
 from schemas.log import LogResponse,LogCreate
 from schemas.metric import MetricResponse
-from typing import List
+from typing import Optional
 from services.mock_generator import generate_mock_logs
 from services.ai_grouping import group_and_summarise
 from services.mock_generator import generate_mock_metrics
@@ -53,8 +53,7 @@ def create_log(db:Session = Depends(get_db)):
     }
 
 @router.get("/logs/analyse")
-def get_losg(db:Session = Depends(get_db)):
-
+def get_losg(filter:Optional[str] = 'all',db:Session = Depends(get_db)):
     results = group_and_summarise(db)
     return results
 
