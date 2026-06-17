@@ -5,7 +5,6 @@ import StatCard from "./components/StatCard";
 import IncidentCard from "./components/IncidentCard";
 import Filters from "./components/Filters";
 import { AlertTriangle, AlertCircle, Network, Heart } from "lucide-react";
-import { dummyStats,dummyIncidents } from "./data/dummyData";
 import { fetchIncidents, fetchStats } from "./services/incidentService";
 import { BackendIncident } from "./types/incident";
 import api from "./lib/axios";

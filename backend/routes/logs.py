@@ -53,7 +53,7 @@ def create_log(db:Session = Depends(get_db)):
     }
 
 @router.get("/logs/analyse")
-def get_losg(filter:Optional[str] = 'all',db:Session = Depends(get_db)):
+def get_losg(db:Session = Depends(get_db)):
     results = group_and_summarise(db)
     return results
 
@@ -164,3 +164,19 @@ def resend_slack_alert(request:SlackAlertRequest):
         return {
             'message':'Failed to send alert'
         }
+    
+@router.get('/stats')
+def get_stats(db:Session = Depends(get_db)):
+    total_logs = db.query(Log).count()
+    error_logs = db.query(Log).filter(Log.level == 'ERROR').count()
+    info_logs = db.query(Log).filter(Log.level == 'INFO').count()
+    services = db.query(Log.service).distinct().count()
+
+    health = round((info_logs/total_logs * 100)) if total_logs > 0 else 100
+
+    return {
+        'total_incidents':total_logs,
+        'critical_issues':error_logs,
+        'active_services':services,
+        'system_health':health
+    }
