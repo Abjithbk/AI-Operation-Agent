@@ -85,7 +85,14 @@ export default function Metrics() {
           </div>
         </div>
 
-        {loading && <p className="text-slate-400">Loading metrics...</p>}
+        {loading && <div className="flex flex-col gap-6">
+    <div className="flex flex-col md:flex-row gap-4">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="bg-slate-900 border border-slate-800 rounded-xl p-5 flex-1 h-48 animate-pulse" />
+      ))}
+    </div>
+    <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 h-64 animate-pulse" />
+  </div>}
         {error && <p className="text-red-400">{error}</p>}
 
         {!loading && !error && (

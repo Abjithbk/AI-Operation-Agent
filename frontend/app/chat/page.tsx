@@ -153,8 +153,10 @@ const Chat = () => {
                 <div className="w-9 h-9 rounded-lg bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
                   <Bot size={18} className="text-indigo-400" />
                 </div>
-                <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-sm text-slate-400">
-                  Thinking...
+                <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-sm text-slate-40 ">
+                  <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{animationDelay: "0ms"}} />
+                  <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{animationDelay: "150ms"}} />
+                  <div className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{animationDelay: "300ms"}} />
                 </div>
               </div>
             )}

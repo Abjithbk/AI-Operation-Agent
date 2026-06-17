@@ -51,7 +51,27 @@ export default function Home() {
   return (
    <div className="min-h-screen bg-slate-950 text-white">
     <Navbar/>
-    <div className="p-4 sm:p-6 lg:p-8">
+    {
+      loading ? (
+        <div className="flex flex-col gap-4">
+          <div className="gird grid-cols-2 md:grid-cols-4 gap-4mb6
+          ">
+            {
+              [...Array(4).map((_,i) => (
+                <div key={i} className="bg-slate-900 border border-slate-800 rounded-xl p-5 h-28 animate-pulse" />
+              ))]
+            }
+
+          </div>
+          <div className="flex flex-col gap-4">
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+
+        </div>
+      ) : (
+        <div className="p-4 sm:p-6 lg:p-8">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <StatCard 
         label="Total Incidents"
@@ -120,6 +140,8 @@ export default function Home() {
 
        </div>
     </div>
+      )
+    }
    </div>
   );
 }
