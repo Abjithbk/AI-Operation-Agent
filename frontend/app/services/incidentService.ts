@@ -11,6 +11,11 @@ export async function fetchIncidents(): Promise<BackendIncident[]> {
     return response.data
     
 }
+export async function fetchStats() {
+    const res = await api.get('/stats');
+    return res.data
+    
+}
 
 export async function resendSlackAlert(incident:BackendIncident):Promise<void> {
 

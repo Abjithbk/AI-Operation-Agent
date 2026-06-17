@@ -75,7 +75,9 @@ const Chat = () => {
       <Navbar />
 
       <div className="flex flex-1">
-        <ChatSidebar />
+        <div className="hidden md:block">
+          <ChatSidebar />
+        </div>
 
         <div className="flex-1 flex flex-col p-8">
           {/* Messages */}

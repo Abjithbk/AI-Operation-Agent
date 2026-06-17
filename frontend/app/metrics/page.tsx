@@ -65,7 +65,7 @@ export default function Metrics() {
     <div className="min-h-screen bg-slate-950 text-white">
       <Navbar />
       <div className="p-8">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col md:flex-row  md:items-center justify-between mb-6 gap-4">
           <div>
             <h2 className="text-2xl font-bold mb-1">System Performance Metrics</h2>
             <p className="text-slate-400 text-sm">
@@ -90,7 +90,7 @@ export default function Metrics() {
 
         {!loading && !error && (
           <>
-            <div className="flex gap-4">
+            <div className="flex flex-col md:flex-row gap-4">
               <MetricCard
                 title="CPU Usage"
                 icon={Cpu}

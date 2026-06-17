@@ -6,13 +6,19 @@ import IncidentCard from "./components/IncidentCard";
 import Filters from "./components/Filters";
 import { AlertTriangle, AlertCircle, Network, Heart } from "lucide-react";
 import { dummyStats,dummyIncidents } from "./data/dummyData";
-import { fetchIncidents } from "./services/incidentService";
+import { fetchIncidents, fetchStats } from "./services/incidentService";
 import { BackendIncident } from "./types/incident";
 import api from "./lib/axios";
 
 export default function Home() {
   const [incidents,setIncidents] = useState<BackendIncident[]>([]);
   const [filter,setFilter] = useState('all')
+  const [stats,setStats] = useState({
+    total_incidents: 0,
+    critical_issues:0,
+    active_services: 0,
+    system_health: 100,
+  })
   const [loading,setLoading] = useState(true);
   const [error,setError] = useState<string | null>(null);
 
@@ -26,8 +32,8 @@ export default function Home() {
 
       try {
         const data = await fetchIncidents();
-        console.log("Incidents Data:",data)
-        console.log("Incidents length:",data.length)
+        const statData = await fetchStats()
+        setStats(statData)
         setIncidents(data);
       }
       catch(err) {
@@ -45,35 +51,35 @@ export default function Home() {
   return (
    <div className="min-h-screen bg-slate-950 text-white">
     <Navbar/>
-    <div className="p-8">
-      <div className="flex gap-4 mb-6">
+    <div className="p-4 sm:p-6 lg:p-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <StatCard 
         label="Total Incidents"
-        value={dummyStats.totalIncidents}
+        value={stats.total_incidents}
         icon={AlertTriangle}
         />
         <StatCard
             label="Critical Issues"
-            value={dummyStats.criticalIssues}
+            value={stats.critical_issues}
             icon={AlertCircle}
             iconColor="text-red-400"
             subtext="+2 since last hour"
           />
           <StatCard
             label="Active Services"
-            value={dummyStats.activeServices}
+            value={stats.active_services}
             icon={Network}
             subtext="99.9% uptime"
           />
           <StatCard
             label="System Health"
-            value={`${dummyStats.systemHealth}%`}
+            value={`${stats.system_health}%`}
             icon={Heart}
           />
 
       </div>
-       <div className="flex gap-6">
-        <div className="w-64">
+       <div className="flex flex-col md:flex-row gap-6">
+        <div className="w-full md:w-64">
           <Filters selected={filter} onChange={setFilter} />
 
         </div>

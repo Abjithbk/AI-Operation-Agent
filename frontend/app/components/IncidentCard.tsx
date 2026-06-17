@@ -46,10 +46,10 @@ const IncidentCard = ({incident} : {incident:Incident}) => {
     }
   return (
     <div
-      className={`bg-slate-900 border border-slate-800 ${styles.border} border-l-4 rounded-xl p-6`}
+      className={`bg-slate-900 border border-slate-800 ${styles.border} border-l-4 rounded-xl p-4 sm:p-6`}
     >
       {/* Header row */}
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex flex-wrap items-center gap-2 mb-3">
         <div className="flex items-center gap-3">
           <span
             className={`text-xs font-bold px-2 py-1 rounded border ${styles.badge}`}

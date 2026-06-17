@@ -39,18 +39,18 @@ const Navbar = () => {
     router.push('/login')
   }
   return (
-    <nav className="border-b border-slate-800 bg-slate-950 px-8 py-4 flex items-center justify-between">
-      <h1 className="text-xl font-bold text-indigo-400">AI Ops Agent</h1>
+    <nav className="border-b border-slate-800 bg-slate-950 px-4 md:px-8 py-3 flex items-center justify-between gap-4">
+      <h1 className="text-lg md:text-xl font-bold text-indigo-400 whitespace-nowrap">AI Ops Agent</h1>
 
-      <div className="flex gap-6 text-sm font-medium">
+      <div className="flex gap-3 md:gap-6 text-sm font-medium ">
         {tabs.map((tab) => (
           <Link
             key={tab.href}
             href={tab.href}
             className={
               pathname === tab.href
-                ? "text-white border-b-2 border-indigo-400 pb-1 transition-all"
-                : "text-slate-400 hover:text-white transition-colors"
+                ? "text-white border-b-2 border-indigo-400 pb-1 transition-all whitespace-nowrap"
+                : "text-slate-400 hover:text-white transition-colors whitespace-nowrap"
             }
           >
             {tab.name}
@@ -58,8 +58,8 @@ const Navbar = () => {
         ))}
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative">
+      <div className="flex items-center gap-2 md:gap-4">
+        <div className="hidden md:flex relative">
           <Search
             className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
             size={16}
@@ -67,12 +67,12 @@ const Navbar = () => {
           <input
             type="text"
             placeholder="Search logs..."
-            className="bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-300 w-64 focus:outline-none focus:border-indigo-400 transition-colors"
+            className="bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-300 w-64 focus:outline-none focus:border-indigo-400 "
           />
         </div>
 
         <Bell
-          className="text-slate-400 hover:text-white cursor-pointer transition-colors"
+          className="hidden md:block text-slate-400 hover:text-white cursor-pointer"
           size={20}
         />
 
@@ -80,12 +80,12 @@ const Navbar = () => {
         <div className="relative" ref={dropdownref}>
           <button
             onClick={() => setShowDropdown(!showDropdown)}
-            className="flex items-center gap-2 bg-slate-900 border border-slate-700 hover:border-indigo-400 rounded-lg px-3 py-2 transition-all duration-200"
+            className="flex items-center gap-1 md:gap-2 bg-slate-900 border border-slate-700 hover:border-indigo-400 rounded-lg px-2 md:px-3 py-2 transition-all duration-200"
           >
             <div className="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center">
               <User size={14} className="text-white" />
             </div>
-            <span className="text-sm text-slate-300 max-w-[120px] truncate">
+            <span className="hidden md:block text-sm text-slate-300 max-w-[120px] truncate">
               {email?.split("@")[0] ?? "Account"}
             </span>
             <ChevronDown
