@@ -8,6 +8,7 @@ import { AlertTriangle, AlertCircle, Network, Heart } from "lucide-react";
 import { fetchIncidents, fetchStats } from "./services/incidentService";
 import { BackendIncident } from "./types/incident";
 import api from "./lib/axios";
+import SkeletonCard from "./components/SkeletonCard";
 
 export default function Home() {
   const [incidents,setIncidents] = useState<BackendIncident[]>([]);
@@ -84,7 +85,11 @@ export default function Home() {
         </div>
          <div className="flex flex-1 flex-col gap-4">
           {loading && (
-              <p className="text-slate-400">Loading incidents...</p>
+              <div className="flex flex-col gap-4">
+                <SkeletonCard />
+                <SkeletonCard />
+                <SkeletonCard />
+              </div>
             )}
 
             {error && <p className="text-red-400">{error}</p>}
