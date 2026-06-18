@@ -13,9 +13,9 @@ llm = ChatGroq(
     model_name="llama-3.3-70b-versatile"
 )
 
-def group_and_summarise(db: Session):
+def group_and_summarise(db: Session,user_id:str):
     # Get only ERROR logs
-    error_logs = db.query(Log).filter(Log.level == "ERROR").all()
+    error_logs = db.query(Log).filter(Log.user_id == user_id).all()
 
     if not error_logs:
         return {"message": "no error logs found"}

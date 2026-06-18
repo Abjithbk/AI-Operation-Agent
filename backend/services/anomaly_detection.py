@@ -3,9 +3,10 @@ from models import Metric
 from sklearn.ensemble import IsolationForest
 import numpy as np
 
-def detect_anomalies(db:Session , metric_name:str):
+def detect_anomalies(db:Session , metric_name:str,user_id:str):
     metrics = db.query(Metric).filter(
-        Metric.metric_name == metric_name
+        Metric.metric_name == metric_name,
+        Metric.user_id == user_id
     ).order_by(Metric.timestamp).all()
 
     if len(metrics) < 10:

@@ -29,7 +29,6 @@ export default function Home() {
 
   useEffect(() => {
     const loadData = async () => {
-
       try {
         const data = await fetchIncidents();
         const statData = await fetchStats()

@@ -11,9 +11,9 @@ llm = ChatGroq(
     model_name="llama-3.3-70b-versatile",
 )
 
-def chat_with_logs(db:Session, question:str):
+def chat_with_logs(db:Session, question:str,user_id:str):
 
-    recent_logs = db.query(Log).order_by(Log.timestamp.desc()).limit(100).all()
+    recent_logs = db.query(Log).filter(Log.user_id == user_id).order_by(Log.timestamp.desc()).limit(100).all()
 
     logs_text = "\n".join([
         f"[{log.timestamp}] {log.level} - {log.service}: {log.message}"

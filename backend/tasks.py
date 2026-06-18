@@ -7,11 +7,11 @@ import json
 import traceback
 
 @celery.task(name='analyse_logs', bind=True)
-def analyse_log_task(self):
+def analyse_log_task(self,user_id:str):
     db = SessionLocal()
 
     try:
-        results = group_and_summarise(db)
+        results = group_and_summarise(db,user_id = user_id)
         for incident in results:
             summary = incident.get('ai_summary',{})
             if isinstance(summary,str):
@@ -40,10 +40,10 @@ def analyse_log_task(self):
 
 
 @celery.task(name="detect_metric_anomalies", bind=True)
-def detect_anomalies_task(self, metric_name: str):
+def detect_anomalies_task(self, metric_name: str,user_id:str):
     db = SessionLocal()
     try:
-        results = detect_anomalies(db, metric_name)
+        results = detect_anomalies(db, metric_name,user_id = user_id)
         return {"status": "success", "anomalies": results["anomalies_found"]}
     except Exception as e:
         print(f"Task failed: {str(e)}")

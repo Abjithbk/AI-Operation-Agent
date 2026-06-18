@@ -3,9 +3,9 @@ from models import Metric,Log
 from services.anomaly_detection import detect_anomalies
 from datetime import timedelta
 
-def correlate_metrics_with_logs(db:Session,metric_name:str):
+def correlate_metrics_with_logs(db:Session,metric_name:str,user_id : str):
 
-    anomaly_result = detect_anomalies(db,metric_name)
+    anomaly_result = detect_anomalies(db,metric_name,user_id)
 
     if "anomalies" not in anomaly_result:
         return {"message": "No anomalies found"}
@@ -23,6 +23,7 @@ def correlate_metrics_with_logs(db:Session,metric_name:str):
 
         related_logs = db.query(Log).filter(
             Log.level == "ERROR",
+            Log.user_id == user_id,
             Log.timestamp >= time_from,
             Log.timestamp <= time_to
         ).all()
