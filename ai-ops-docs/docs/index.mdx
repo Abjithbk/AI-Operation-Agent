@@ -1,0 +1,82 @@
+---
+sidebar_position: 1
+slug: /
+---
+
+# What is AI Ops Agent?
+
+AI Ops Agent is an **AI-powered observability platform** that automatically monitors your production applications, detects anomalies, and explains what went wrong — in plain English.
+
+## The Problem
+
+Modern applications generate thousands of logs every minute. When something breaks at 2 AM, engineers waste hours scrolling through raw log files trying to find the root cause.
+
+[10:32:01] ERROR - Database connection failed: db-prod-1
+
+[10:32:01] ERROR - Cannot reach database at db-prod-1:5432
+
+[10:32:02] ERROR - Database connection failed: db-prod-1
+
+[10:32:02] ERROR - Failed to execute query - connection refused
+
+... 312 more lines
+
+## The Solution
+
+AI Ops Agent turns that noise into a single clean incident card:
+
+🔴 CRITICAL — Database Connection Failure
+
+312 occurrences | payment-service, auth-service, checkout-service
+
+AI Summary: Production database db-prod-1 is unreachable
+
+Suggestion: Check db-prod-1 connectivity and restart if needed
+
+## How It Works
+
+Your Production App
+
+↓
+
+Sends logs via simple API call
+
+↓
+
+AI Ops Agent analyzes with NLP + ML
+
+↓
+
+You see clean insights on dashboard
+
+↓
+
+Fix issues 10x faster
+
+## Key Features
+
+- 🔍 **Log Grouping** — NLP clusters thousands of similar logs into clean incident cards
+- 📊 **Anomaly Detection** — ML detects CPU, memory, and response time spikes
+- 🔗 **Correlation Engine** — Links metric spikes to related error logs automatically
+- 🤖 **AI Summarization** — Groq LLM explains root causes in plain English
+- 💬 **Chat with Logs** — Ask questions about your logs in natural language
+- 🚨 **Slack Alerts** — Auto-notifies team on CRITICAL/HIGH incidents
+- ⚡ **Async Processing** — Redis/Celery queue handles heavy AI tasks in background
+
+## Current Version
+
+:::info V1 — Demo Mode
+The current version uses a **mock log generator** that simulates realistic production logs. A Python SDK for real production integration is coming in V2.
+:::
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | FastAPI, Python 3.12 |
+| Database | PostgreSQL (Supabase) |
+| Queue | Celery + Redis (Upstash) |
+| AI/ML | Groq LLM, Scikit-learn |
+| Frontend | Next.js 16, TypeScript |
+| Auth | Supabase Auth |
+| Alerts | Slack Webhooks |
