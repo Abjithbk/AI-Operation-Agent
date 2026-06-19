@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
+from datetime import datetime
 from models import Log, Metric, ApiKey
 from schemas.log import LogResponse, LogCreate
 from dependencies.auth import get_current_user_id, require_api_key
@@ -61,14 +62,45 @@ def get_logs_analysis(
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user_id)
 ):
-    # Pass user_id to your AI grouping service to filter logs first
+    
     results = group_and_summarise(db, user_id=user_id) 
     return results
 
-# ==========================================
-# METRICS
-# ==========================================
 
+# METRICS
+
+@router.post('/metrics')
+def receive_sdk_metric(
+    metric_data: dict,
+    db: Session = Depends(get_db),
+    user_id: str = Depends(require_api_key)
+):
+    """
+    Receive a single metric from the SDK
+    Expected format:
+    {
+        "metric_name": "cpu_usage",
+        "value": 45.2,
+        "service": "system"
+    }
+    """
+    try:
+        new_metric = Metric(
+            metric_name=metric_data["metric_name"],
+            value=metric_data["value"],
+            service=metric_data.get("service", "default"),
+            timestamp=datetime.utcnow(),
+            user_id=user_id
+        )
+        
+        db.add(new_metric)
+        db.commit()
+        db.refresh(new_metric)
+        
+        return {"status": "success", "metric_id": new_metric.id}
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save metric: {str(e)}")
 @router.post("/metrics/generate")
 def generate_metrics(
     db: Session = Depends(get_db),
@@ -80,7 +112,7 @@ def generate_metrics(
             service=metric.service,
             metric_name=metric.metric_name,
             value=metric.value,
-            user_id=user_id  # <-- Multi-tenancy
+            user_id=user_id  
         )
         db.add(new_metric)
     db.commit()
@@ -103,7 +135,7 @@ def get_metric_readings(
 ):
     metrics = db.query(Metric).filter(
         Metric.metric_name == metric_name,
-        Metric.user_id == user_id  # <-- Multi-tenancy filter
+        Metric.user_id == user_id  
     ).order_by(Metric.timestamp).all()
     
     return [
@@ -115,9 +147,9 @@ def get_metric_readings(
         for m in metrics
     ]
 
-# ==========================================
+
 # CORRELATION & CHAT
-# ==========================================
+
 
 @router.get("/correlate/{metric_name}")
 def correlate(
@@ -134,19 +166,19 @@ def chat(
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user_id)
 ):
-    # Pass user_id so the AI only reads THIS user's logs
+   
     answer = chat_with_logs(db, request.question, user_id=user_id)
     return {"answer": answer}
 
-# ==========================================
+
 # API KEYS (Multi-tenant Management)
-# ==========================================
+
 
 @router.post('/api-keys')
 def create_api_key(
     name: str,
     db: Session = Depends(get_db),
-    user_id: str = Depends(get_current_user_id) # <-- Link key to logged-in user
+    user_id: str = Depends(get_current_user_id) 
 ):
     api_key = generate_api_key(db, name, user_id=user_id)
     return {
@@ -159,7 +191,7 @@ def create_api_key(
 @router.get('/api-keys')
 def get_api_keys(
     db: Session = Depends(get_db),
-    user_id: str = Depends(get_current_user_id) # <-- Only show user's own keys
+    user_id: str = Depends(get_current_user_id) 
 ):
     keys = db.query(ApiKey).filter(ApiKey.user_id == user_id).all()
 
@@ -172,15 +204,15 @@ def get_api_keys(
         for k in keys
     ]
 
-# ==========================================
+
 # BACKGROUND TASKS & ALERTS
-# ==========================================
+
 
 @router.post('/logs/analyse/async')
 def analyse_logs_async(
     user_id: str = Depends(get_current_user_id)
 ):
-    # Pass user_id to Celery so it only processes this user's logs
+
     task = analyse_log_task.delay(user_id=user_id)
     return {
         'message': 'Analysis started in background',
@@ -218,9 +250,9 @@ def resend_slack_alert(
     else:
         return {'message': 'Failed to send alert'}
     
-# ==========================================
+
 # STATS (Dashboard)
-# ==========================================
+
 
 @router.get('/stats')
 def get_stats(
