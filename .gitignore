@@ -1,2 +1,4 @@
 docs/CURRENT_TASK.md
 docs/AI_HANDOFF.md
+test_sdk.py
+sdk/aiops_agent.egg-info/

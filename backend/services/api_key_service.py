@@ -2,12 +2,13 @@ import secrets
 from sqlalchemy.orm import Session
 from models import ApiKey
 
-def generate_api_key(db:Session,name:str):
+def generate_api_key(db:Session,name:str,user_id:str):
     new_key = 'aiops_'+secrets.token_urlsafe(32)
 
     api_key = ApiKey(
         key = new_key,
         name=name,
+        user_id=user_id,
         is_active = 'true'
     )
     db.add(api_key)
@@ -22,4 +23,7 @@ def verify_api_key(db:Session,key:str) -> bool:
         ApiKey.is_active == 'true'
     ).first()
 
-    return api_key is not None
+    if api_key:
+        return str(api_key.user_id)
+
+    return None

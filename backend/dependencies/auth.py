@@ -1,6 +1,6 @@
 import os
 import asyncio
-from fastapi import Header,HTTPException,Depends,status
+from fastapi import Request,HTTPException,Depends,status
 from fastapi.security import OAuth2PasswordBearer
 from supabase import create_client,Client
 from sqlalchemy.orm import Session
@@ -14,10 +14,16 @@ supabase:Client = create_client(
     os.environ.get('SUPABASE_SERVICE_ROLE_KEY')
 )
 
-def require_api_key(x_api_key:str = Header(...),db:Session = Depends(get_db)):
-    if not verify_api_key(db,x_api_key):
-        raise HTTPException(status_code=401,detail='Invalid or missing API key')
-    return x_api_key
+def require_api_key(request:Request,db:Session = Depends(get_db)):
+    api_key = request.headers.get('X-API-KEY')
+
+    if not api_key:
+        raise HTTPException(status_code=401,detail='API key required')
+    user_id = verify_api_key(db,api_key)
+    if not user_id:
+        raise HTTPException(status_code=401,detail="Invalid API key")
+    
+    return user_id
 
 async def get_current_user_id(token :str = Depends(oauth2_scheme)) -> str:
 
