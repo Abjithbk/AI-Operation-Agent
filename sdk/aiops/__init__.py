@@ -3,12 +3,17 @@ from .client import AIOpsClient
 from .metrics import MetricsCollector
 from .exceptions import enable_auto_capture
 from .log_handler import enable_log_capture
-
+from .batch import batch_processor
 _metrics_collector = None
 
-def init(api_key:str,api_url:str=None,collect_metrics:bool = True,metrics_interval:int = 30,auto_capture_errors:bool = True,capture_logs:bool = True,log_min_level:str = 'WARNING'):
+def init(api_key:str,api_url:str=None,collect_metrics:bool = True,metrics_interval:int = 30,auto_capture_errors:bool = True,capture_logs:bool = True,log_min_level:str = 'WARNING',batch_flush_interval:int = 5):
 
     Config.init(api_key,api_url)
+
+    #Start Batch processor
+    batch_processor.flush_interval = batch_flush_interval
+    batch_processor.start()
+
     #Metrics collection
     if collect_metrics:
         global _metrics_collector
@@ -38,7 +43,9 @@ def shutdown():
     if _metrics_collector:
         _metrics_collector.stop()
         _metrics_collector = None
-        print(f"[AIOps] SDK shutdown complete")
+
+    batch_processor.stop()
+    print(f"[AIOps] SDK shutdown complete")
 
 def log(message:str,level:str = 'INFO',service:str = 'default'):
     AIOpsClient.send_log(message,level,service)
