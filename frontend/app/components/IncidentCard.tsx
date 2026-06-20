@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Sparkles,Wand2,Clock,Bell,BellRing } from 'lucide-react'
 import { Incident } from '../types/incident';
 import { resendSlackAlert } from '../services/incidentService';
+import toast from 'react-hot-toast';
 
 const severityStyles = {
   CRITICAL: {
@@ -29,7 +30,7 @@ const IncidentCard = ({incident} : {incident:Incident}) => {
     const [sent,setSent] = useState(false)
 
     const handleSlackAlert = async () => {
-      setSending(false)
+      setSending(true)
       try {
         await resendSlackAlert(incident)
         setSent(true)
@@ -37,8 +38,8 @@ const IncidentCard = ({incident} : {incident:Incident}) => {
           setSent(false)
         }, 3000);
       }
-      catch(err) {
-        console.error(err)
+      catch(err:any) {
+        toast.error(err.response?.data?.message || 'Failed to send alert!',{duration:3000})
       }
       finally {
         setSending(false)

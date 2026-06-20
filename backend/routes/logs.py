@@ -236,23 +236,27 @@ def resend_slack_alert(
     db:Session = Depends(get_db),
     user_id: str = Depends(get_current_user_id)
 ):
-    profile = db.query(Profile).filter(Profile.id == user_id).first()
-    # Note: Phase 3 will use the user's specific webhook URL. 
-    # For now, we just pass the user_id for future-proofing.
-    success = send_slack_alert(
-        group=request.group,
-        summary=request.summary,
-        severity=request.severity,
-        suggestion=request.suggestion,
-        log_count=request.log_count,
-        user_id=user_id,
-        user_slack_webhook_url=profile.slack_webhook_url if profile else None
-    )
+    try:
+        profile = db.query(Profile).filter(Profile.id == user_id).first()
+        # Note: Phase 3 will use the user's specific webhook URL. 
+        # For now, we just pass the user_id for future-proofing.
+        success = send_slack_alert(
+            group=request.group,
+            summary=request.summary,
+            severity=request.severity,
+            suggestion=request.suggestion,
+            log_count=request.log_count,
+            user_slack_webhook_url=profile.slack_webhook_url if profile else None
+        )
 
-    if success:
-        return {"message": "Alert sent to Slack Successfully"}
-    else:
-        return {'message': 'Failed to send alert'}
+        if success:
+            return {"message": "Alert sent to Slack Successfully"}
+        else:
+            return {'message': 'Failed to send alert'}
+    except Exception as e:
+        return {
+            'message':f"Error: {str(e)}"
+        }
     
 
 # STATS (Dashboard)

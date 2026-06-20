@@ -30,11 +30,18 @@ const SlackSettings = () => {
             const res = await api.post('/slack',{
             slack_webhook_url:slackUrl
         });
+        setSlackUrl('')
 
         setMessage({text:res.data.message , type:'success'})
+        setTimeout(()=> {
+            setMessage({text:'',type:''})
+        },3000);
         }
         catch(err) {
             setMessage({text:'Failed to save.Please check the url',type:'error'})
+            setTimeout(() => {
+                setMessage({text:'',type:''})
+            }, 3000);
         }
         finally{
             setLoading(false)
@@ -60,7 +67,7 @@ const SlackSettings = () => {
             Incoming Webhook URL
           </label>
           <input
-            type="text"
+            type="password"
             value={slackUrl || ''}
             onChange={(e) => setSlackUrl(e.target.value)}
             placeholder="https://hooks.slack.com/services/T00.../B00.../xxx"

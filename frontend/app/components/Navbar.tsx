@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
-import {Search, Bell,User, LogOut, Key, ChevronDown} from 'lucide-react'
+import {Search, Bell,User, LogOut, Key, ChevronDown, Hash} from 'lucide-react'
 import Link from 'next/link'
 import { usePathname,useRouter } from 'next/navigation'
 import { supabase } from '../lib/supabase'
@@ -127,6 +127,7 @@ const Navbar = () => {
               onClick={() =>setShowDropdown(false)}
               className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
               >
+              <Hash size={16} className='text-indigo-400'/>
               Slack Integration
               </Link>
 
