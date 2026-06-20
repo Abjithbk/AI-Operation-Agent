@@ -1,4 +1,4 @@
-from sqlalchemy import Column,Float,String,DateTime,ForeignKey
+from sqlalchemy import Column,Float,String,DateTime
 from sqlalchemy.sql import func
 from sqlalchemy.dialects.postgresql import UUID
 from database import Base
@@ -34,5 +34,13 @@ class ApiKey(Base):
     created_at = Column(DateTime,default=func.now())
     is_active = Column(String,default=True)
     user_id = Column(UUID(as_uuid=True),nullable=False,index=True)
+
+class Profile(Base):
+    __tablename__ = "profiles"
+
+    id = Column(UUID(as_uuid=True),primary_key=True)
+    email = Column(String)
+    slack_webhook_url = Column(String,nullable=True)
+    created_at = Column(DateTime,default=func.now())
 
 

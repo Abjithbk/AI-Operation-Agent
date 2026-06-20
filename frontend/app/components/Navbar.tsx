@@ -122,6 +122,13 @@ const Navbar = () => {
                 <Key size={16} className="text-indigo-400" />
                 API Keys
               </Link>
+              <Link
+              href='/settings/slack_integration'
+              onClick={() =>setShowDropdown(false)}
+              className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-300 hover:bg-slate-800 hover:text-white transition-colors"
+              >
+              Slack Integration
+              </Link>
 
               <button
                 onClick={handleLogout}

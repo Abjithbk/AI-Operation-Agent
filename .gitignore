@@ -6,3 +6,4 @@ test_auto_exception.py
 test_log_capture.py
 test_batch.py
 sdk/aiops_agent.egg-info/
+sdk/dist/

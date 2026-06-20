@@ -4,10 +4,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
+ADMIN_SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL")
 
 def send_slack_alert(group: str, summary: str, severity: str, 
-                     suggestion: str, log_count: int):
+                     suggestion: str, log_count: int,user_slack_webhook_url:str = None):
+    
+    target_url = user_slack_webhook_url if user_slack_webhook_url else ADMIN_SLACK_WEBHOOK_URL
     
     # Color based on severity
     color_map = {
@@ -84,7 +86,7 @@ def send_slack_alert(group: str, summary: str, severity: str,
     }
 
     try:
-        response = requests.post(SLACK_WEBHOOK_URL, json=payload)
+        response = requests.post(target_url, json=payload)
         return response.status_code == 200
     except Exception as e:
         print(f"Slack alert failed: {str(e)}")

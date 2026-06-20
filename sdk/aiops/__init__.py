@@ -4,6 +4,7 @@ from .metrics import MetricsCollector
 from .exceptions import enable_auto_capture
 from .log_handler import enable_log_capture
 from .batch import batch_processor
+from.middleware import AIOpsMiddleware
 _metrics_collector = None
 
 def init(api_key:str,api_url:str=None,collect_metrics:bool = True,metrics_interval:int = 30,auto_capture_errors:bool = True,capture_logs:bool = True,log_min_level:str = 'WARNING',batch_flush_interval:int = 5):

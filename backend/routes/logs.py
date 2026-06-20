@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 from datetime import datetime
-from models import Log, Metric, ApiKey
+from models import Log, Metric, ApiKey,Profile
 from schemas.log import LogResponse, LogCreate
 from dependencies.auth import get_current_user_id, require_api_key
 from services.mock_generator import generate_mock_logs, generate_mock_metrics
@@ -12,6 +12,7 @@ from services.correlation import correlate_metrics_with_logs
 from services.chat_service import chat_with_logs
 from services.api_key_service import generate_api_key
 from schemas.chat import ChatRequest, ChatResponse
+from schemas.slack import SlackWebhookRequest
 from tasks import analyse_log_task
 from services.slack_notifier import send_slack_alert
 from schemas.slack import SlackAlertRequest
@@ -232,8 +233,10 @@ def get_task_status(task_id: str):
 @router.post('/alerts/slack')
 def resend_slack_alert(
     request: SlackAlertRequest,
+    db:Session = Depends(get_db),
     user_id: str = Depends(get_current_user_id)
 ):
+    profile = db.query(Profile).filter(Profile.id == user_id).first()
     # Note: Phase 3 will use the user's specific webhook URL. 
     # For now, we just pass the user_id for future-proofing.
     success = send_slack_alert(
@@ -242,7 +245,8 @@ def resend_slack_alert(
         severity=request.severity,
         suggestion=request.suggestion,
         log_count=request.log_count,
-        user_id=user_id 
+        user_id=user_id,
+        user_slack_webhook_url=profile.slack_webhook_url if profile else None
     )
 
     if success:
@@ -272,4 +276,29 @@ def get_stats(
         'critical_issues': error_logs,
         'active_services': services,
         'system_health': health
+    }
+
+@router.post('/slack')
+def save_slack_webhook(data: SlackWebhookRequest,db:Session = Depends(get_db),current_user_id = Depends(get_current_user_id)):
+
+    profile = db.query(Profile).filter(Profile.id == current_user_id).first()
+
+    if not profile:
+        raise HTTPException(status_code=404,detail='Profile not found')
+    profile.slack_webhook_url = data.slack_webhook_url
+    db.commit()
+
+    return {
+        'message':'Slack webhook URL saved successfully'
+    }
+
+@router.get('/slack')
+def get_slack_webhook(db:Session = Depends(get_db),current_user_id = Depends(get_current_user_id)):
+    profile = db.query(Profile).filter(Profile.id == current_user_id).first()
+
+    if not profile:
+        raise HTTPException(status_code=404,detail='Profile not found')
+    
+    return {
+        'slack_webhook_url':profile.slack_webhook_url
     }
