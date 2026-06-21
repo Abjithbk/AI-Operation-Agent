@@ -3,6 +3,8 @@ from database import SessionLocal
 from services.ai_grouping import group_and_summarise
 from services.anomaly_detection import detect_anomalies
 from services.slack_notifier import send_slack_alert 
+from utils.redis_publisher import publish_incident
+from models import Profile
 import json
 import traceback
 
@@ -18,17 +20,21 @@ def analyse_log_task(self,user_id:str):
                 summary = json.loads(summary)
             severity = summary.get('severity','LOW')
 
+            publish_incident(incident)
+
             if severity in ["CRITICAL", "HIGH"]:
                 send_slack_alert(
                     group=summary.get("group", "Unknown"),
                     summary=summary.get("summary", ""),
                     severity=severity,
                     suggestion=summary.get("suggestion", ""),
-                    log_count=incident.get("log_count", 0)
+                    log_count=incident.get("log_count", 0),
+                    user_slack_webhook_url=Profile.slack_webhook_url if Profile.slack_webhook_url else None
                 )
 
         return {
             'status': 'success',
+            'user_id':user_id,
             'incidents': len(results)
         }
     except Exception as e:

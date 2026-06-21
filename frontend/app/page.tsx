@@ -9,6 +9,8 @@ import { fetchIncidents, fetchStats } from "./services/incidentService";
 import { BackendIncident } from "./types/incident";
 import api from "./lib/axios";
 import SkeletonCard from "./components/SkeletonCard";
+import { useWebSocket } from "./hooks/useWebSocket";
+import toast from "react-hot-toast";
 
 export default function Home() {
   const [incidents,setIncidents] = useState<BackendIncident[]>([]);
@@ -26,6 +28,8 @@ export default function Home() {
     if(filter === 'all') return true
     return incident.ai_summary.severity.toLowerCase() === filter
   })
+
+  const {isConnected,onMessage} = useWebSocket()
 
   useEffect(() => {
     const loadData = async () => {
@@ -47,6 +51,27 @@ export default function Home() {
     loadData()
 
   },[])
+
+  useEffect(() => {
+    onMessage((message) => {
+      if(message.type === 'new_incident') {
+        const newIncident = message.data;
+
+        setIncidents((prev) => [newIncident,...prev]);
+
+        setStats((prev) => ({
+          ...prev,
+          total_incidents:prev.total_incidents + 1,
+          critical_issues:prev.critical_issues+ (newIncident.ai_summary.severity === 'CRITICAL'? 1: 0),
+        }))
+        const severity = newIncident.ai_summary.severity;
+      toast.success(`New ${severity} incident detected!`, {
+        icon: severity === 'CRITICAL' ? '🚨' : '⚠️',
+        duration: 5000,
+      });
+      }
+    })
+  },[onMessage])
   return (
    <div className="min-h-screen bg-slate-950 text-white">
     <Navbar/>

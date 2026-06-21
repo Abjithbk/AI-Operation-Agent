@@ -1,9 +1,10 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
-import {Search, Bell,User, LogOut, Key, ChevronDown, Hash} from 'lucide-react'
+import {Search, Bell,User, LogOut, Key, ChevronDown, Hash, Wifi, WifiOff} from 'lucide-react'
 import Link from 'next/link'
 import { usePathname,useRouter } from 'next/navigation'
 import { supabase } from '../lib/supabase'
+import { useWebSocket } from '../hooks/useWebSocket'
 const Navbar = () => {
 
 
@@ -17,6 +18,7 @@ const Navbar = () => {
     { name: "Chat", href: "/chat" },
   ];
   const dropdownref = useRef<HTMLDivElement>(null)
+  const {isConnected} = useWebSocket()
 
   useEffect(() => {
     supabase.auth.getSession().then(({data :{session}}) => {
@@ -140,6 +142,19 @@ const Navbar = () => {
               </button>
             </div>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {isConnected ? (
+            <div className="flex items-center gap-2 text-green-400 text-sm">
+              <Wifi size={16} />
+              <span>Live</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-red-400 text-sm">
+              <WifiOff size={16} />
+              <span>Disconnected</span>
+            </div>
+          )}
         </div>
       </div>
     </nav>

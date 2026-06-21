@@ -16,6 +16,7 @@ from schemas.slack import SlackWebhookRequest
 from tasks import analyse_log_task
 from services.slack_notifier import send_slack_alert
 from schemas.slack import SlackAlertRequest
+from websocket_manager import ws_manager
 
 router = APIRouter()
 
@@ -59,12 +60,17 @@ def create_mock_logs(
     return {"message": "1000 mocks created for your account"}
 
 @router.get("/logs/analyse")
-def get_logs_analysis(
+async def get_logs_analysis(
     db: Session = Depends(get_db),
     user_id: str = Depends(get_current_user_id)
 ):
     
     results = group_and_summarise(db, user_id=user_id) 
+    for incident in results:
+        await ws_manager.broadcast({
+            'type':'new_incident',
+            'data':incident
+        })
     return results
 
 
